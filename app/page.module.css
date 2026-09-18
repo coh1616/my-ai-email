@@ -48,6 +48,11 @@
   font-weight: 600;
 }
 
+.sentAt {
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
 .title {
   font-family: var(--font-fraunces), serif;
   font-weight: 600;

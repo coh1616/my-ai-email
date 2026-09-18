@@ -18,6 +18,13 @@ function formatDate(date) {
   }`;
 }
 
+function formatDateTime(isoString) {
+  const date = new Date(isoString);
+  return `${formatDate(date)} ${String(date.getHours()).padStart(2, "0")}:${String(
+    date.getMinutes()
+  ).padStart(2, "0")}`;
+}
+
 export default function Home() {
   const [data, setData] = useState(null);
   const [error, setError] = useState(null);
@@ -32,7 +39,7 @@ export default function Home() {
       setLoading(true);
       setError(null);
       try {
-        const res = await fetch("/api/daily-brief");
+        const res = await fetch("/api/daily-brief/latest");
         const json = await res.json();
         if (!res.ok) {
           throw new Error(json.error ?? "取得資料失敗");
@@ -67,6 +74,11 @@ export default function Home() {
             {getGreeting(now.getHours())}
             {data ? `，今天${data.weather.condition} ${data.weather.icon}` : ""}
           </h1>
+          {data?.createdAt && (
+            <p className={styles.sentAt}>
+              最後寄送於 {formatDateTime(data.createdAt)}
+            </p>
+          )}
         </header>
 
         {loading && (
