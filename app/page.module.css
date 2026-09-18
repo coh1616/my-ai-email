@@ -342,6 +342,10 @@
   color: inherit;
 }
 
+.historyItemActive .historyDate {
+  color: var(--accent);
+}
+
 .historyDate {
   display: flex;
   align-items: center;
