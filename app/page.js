@@ -124,6 +124,67 @@ export default function Home() {
           )}
         </header>
 
+        <section className={styles.newsCard}>
+          <div className={styles.cardHead}>
+            <span className={styles.cardIcon}>📮</span>
+            <h2>寄送紀錄</h2>
+          </div>
+
+          {historyLoading && <p className={styles.cardSubtext}>載入中...</p>}
+          {historyError && (
+            <p className={styles.error}>發生錯誤：{historyError}</p>
+          )}
+          {!historyLoading && !historyError && historyItems.length === 0 && (
+            <p className={styles.cardSubtext}>尚無寄送紀錄</p>
+          )}
+
+          <ul className={styles.historyList}>
+            {historyItems.map((item) => {
+              const expanded = item._id === expandedId;
+              return (
+                <li key={item._id} className={styles.historyItem}>
+                  <button
+                    type="button"
+                    className={styles.historyItemHead}
+                    onClick={() => setExpandedId(expanded ? null : item._id)}
+                  >
+                    <span className={styles.historyDate}>
+                      {item.weather?.date}
+                      <span className={styles.badge}>已寄出</span>
+                    </span>
+                    <span className={styles.historyTime}>
+                      {formatDateTime(item.createdAt)}
+                    </span>
+                  </button>
+                  <p className={styles.historySnippet}>
+                    {truncateText(item.encouragement)}
+                  </p>
+                  {expanded && (
+                    <div className={styles.historyMeta}>
+                      <div>
+                        <span>收件人</span>
+                        <strong>{item.sentTo}</strong>
+                      </div>
+                      <div>
+                        <span>寄件人</span>
+                        <strong>今日簡報 &lt;onboarding@resend.dev&gt;</strong>
+                      </div>
+                      <div>
+                        <span>簡報日期</span>
+                        <strong>{item.weather?.date}</strong>
+                      </div>
+                      <div>
+                        <span>Resend ID</span>
+                        <strong>{item.resendId ?? "—"}</strong>
+                      </div>
+                    </div>
+                  )}
+                </li>
+              );
+            })}
+          </ul>
+        </section>
+
         {loading && (
           <div className={styles.loading}>
             <span className={styles.spinner} aria-hidden="true" />
@@ -221,73 +282,6 @@ export default function Home() {
                     </a>
                   </li>
                 ))}
-              </ul>
-            </section>
-
-            <section className={styles.newsCard}>
-              <div className={styles.cardHead}>
-                <span className={styles.cardIcon}>📮</span>
-                <h2>寄送紀錄</h2>
-              </div>
-
-              {historyLoading && (
-                <p className={styles.cardSubtext}>載入中...</p>
-              )}
-              {historyError && (
-                <p className={styles.error}>發生錯誤：{historyError}</p>
-              )}
-              {!historyLoading &&
-                !historyError &&
-                historyItems.length === 0 && (
-                  <p className={styles.cardSubtext}>尚無寄送紀錄</p>
-                )}
-
-              <ul className={styles.historyList}>
-                {historyItems.map((item) => {
-                  const expanded = item._id === expandedId;
-                  return (
-                    <li key={item._id} className={styles.historyItem}>
-                      <button
-                        type="button"
-                        className={styles.historyItemHead}
-                        onClick={() =>
-                          setExpandedId(expanded ? null : item._id)
-                        }
-                      >
-                        <span className={styles.historyDate}>
-                          {item.weather?.date}
-                          <span className={styles.badge}>已寄出</span>
-                        </span>
-                        <span className={styles.historyTime}>
-                          {formatDateTime(item.createdAt)}
-                        </span>
-                      </button>
-                      <p className={styles.historySnippet}>
-                        {truncateText(item.encouragement)}
-                      </p>
-                      {expanded && (
-                        <div className={styles.historyMeta}>
-                          <div>
-                            <span>收件人</span>
-                            <strong>{item.sentTo}</strong>
-                          </div>
-                          <div>
-                            <span>寄件人</span>
-                            <strong>今日簡報 &lt;onboarding@resend.dev&gt;</strong>
-                          </div>
-                          <div>
-                            <span>簡報日期</span>
-                            <strong>{item.weather?.date}</strong>
-                          </div>
-                          <div>
-                            <span>Resend ID</span>
-                            <strong>{item.resendId ?? "—"}</strong>
-                          </div>
-                        </div>
-                      )}
-                    </li>
-                  );
-                })}
               </ul>
             </section>
           </div>
