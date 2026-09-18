@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import Link from "next/link";
 import styles from "./page.module.css";
 
 const WEEKDAYS = ["日", "一", "二", "三", "四", "五", "六"];
@@ -26,10 +25,20 @@ function formatDateTime(isoString) {
   ).padStart(2, "0")}`;
 }
 
+function truncateText(text, max = 36) {
+  if (!text) return "";
+  return text.length > max ? `${text.slice(0, max)}…` : text;
+}
+
 export default function Home() {
   const [data, setData] = useState(null);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
+
+  const [historyItems, setHistoryItems] = useState([]);
+  const [historyLoading, setHistoryLoading] = useState(true);
+  const [historyError, setHistoryError] = useState(null);
+  const [expandedId, setExpandedId] = useState(null);
 
   const now = useMemo(() => new Date(), []);
 
@@ -60,6 +69,39 @@ export default function Home() {
     }
 
     fetchBrief();
+
+    return () => {
+      ignore = true;
+    };
+  }, []);
+
+  useEffect(() => {
+    let ignore = false;
+
+    async function fetchHistory() {
+      setHistoryLoading(true);
+      setHistoryError(null);
+      try {
+        const res = await fetch("/api/daily-brief/history");
+        const json = await res.json();
+        if (!res.ok) {
+          throw new Error(json.error ?? "取得紀錄失敗");
+        }
+        if (!ignore) {
+          setHistoryItems(json);
+        }
+      } catch (err) {
+        if (!ignore) {
+          setHistoryError(err.message);
+        }
+      } finally {
+        if (!ignore) {
+          setHistoryLoading(false);
+        }
+      }
+    }
+
+    fetchHistory();
 
     return () => {
       ignore = true;
@@ -181,13 +223,78 @@ export default function Home() {
                 ))}
               </ul>
             </section>
+
+            <section className={styles.newsCard}>
+              <div className={styles.cardHead}>
+                <span className={styles.cardIcon}>📮</span>
+                <h2>寄送紀錄</h2>
+              </div>
+
+              {historyLoading && (
+                <p className={styles.cardSubtext}>載入中...</p>
+              )}
+              {historyError && (
+                <p className={styles.error}>發生錯誤：{historyError}</p>
+              )}
+              {!historyLoading &&
+                !historyError &&
+                historyItems.length === 0 && (
+                  <p className={styles.cardSubtext}>尚無寄送紀錄</p>
+                )}
+
+              <ul className={styles.historyList}>
+                {historyItems.map((item) => {
+                  const expanded = item._id === expandedId;
+                  return (
+                    <li key={item._id} className={styles.historyItem}>
+                      <button
+                        type="button"
+                        className={styles.historyItemHead}
+                        onClick={() =>
+                          setExpandedId(expanded ? null : item._id)
+                        }
+                      >
+                        <span className={styles.historyDate}>
+                          {item.weather?.date}
+                          <span className={styles.badge}>已寄出</span>
+                        </span>
+                        <span className={styles.historyTime}>
+                          {formatDateTime(item.createdAt)}
+                        </span>
+                      </button>
+                      <p className={styles.historySnippet}>
+                        {truncateText(item.encouragement)}
+                      </p>
+                      {expanded && (
+                        <div className={styles.historyMeta}>
+                          <div>
+                            <span>收件人</span>
+                            <strong>{item.sentTo}</strong>
+                          </div>
+                          <div>
+                            <span>寄件人</span>
+                            <strong>今日簡報 &lt;onboarding@resend.dev&gt;</strong>
+                          </div>
+                          <div>
+                            <span>簡報日期</span>
+                            <strong>{item.weather?.date}</strong>
+                          </div>
+                          <div>
+                            <span>Resend ID</span>
+                            <strong>{item.resendId ?? "—"}</strong>
+                          </div>
+                        </div>
+                      )}
+                    </li>
+                  );
+                })}
+              </ul>
+            </section>
           </div>
         )}
 
         <footer className={styles.footer}>
           天氣資料來自 Open-Meteo・股價資料來自證交所 OpenAPI・鼓勵語由 OpenAI 生成
-          <br />
-          <Link href="/history">查看寄送紀錄 →</Link>
         </footer>
       </main>
     </div>
