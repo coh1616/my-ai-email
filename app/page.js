@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import Link from "next/link";
 import styles from "./page.module.css";
 
 const WEEKDAYS = ["日", "一", "二", "三", "四", "五", "六"];
@@ -185,6 +186,8 @@ export default function Home() {
 
         <footer className={styles.footer}>
           天氣資料來自 Open-Meteo・股價資料來自證交所 OpenAPI・鼓勵語由 OpenAI 生成
+          <br />
+          <Link href="/history">查看寄送紀錄 →</Link>
         </footer>
       </main>
     </div>

@@ -15,10 +15,14 @@ export async function POST(request) {
   after(async () => {
     try {
       const brief = await getDailyBrief();
-      await sendDailyBriefEmail(brief);
+      const result = await sendDailyBriefEmail(brief);
 
       await connectToDatabase();
-      await DailyBrief.create({ ...brief, sentTo: TO_EMAIL });
+      await DailyBrief.create({
+        ...brief,
+        sentTo: TO_EMAIL,
+        resendId: result?.id,
+      });
     } catch (error) {
       console.error("每日簡報寄送失敗:", error);
     }

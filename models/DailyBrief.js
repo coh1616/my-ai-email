@@ -50,6 +50,7 @@ const DailyBriefSchema = new mongoose.Schema(
     news: [NewsItemSchema],
     encouragement: String,
     sentTo: String,
+    resendId: String,
   },
   { timestamps: true }
 );

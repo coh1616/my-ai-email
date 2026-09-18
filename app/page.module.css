@@ -321,6 +321,11 @@
   padding-top: 8px;
 }
 
+.footer a {
+  color: var(--accent);
+  opacity: 1;
+}
+
 @media (max-width: 640px) {
   .main {
     padding: 48px 20px 40px;
